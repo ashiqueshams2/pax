@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pax - Bill Splitting Made Simple</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            color: #121212;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2171ec;
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            font-size: 16px;
+            color: #adadad;
+            font-weight: 400;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 2px solid #e7e8ec;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #121212;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            border: 2px solid #e7e8ec;
+            background: #ffffff;
+            color: #121212;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #2171ec;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #2171ec;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #1a5fc4;
+        }
+
+        .btn-secondary {
+            background: #e7e8ec;
+            color: #121212;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d2d6;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #ffffff;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .room-info {
+            background: #f8f9fa;
+            padding: 16px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2171ec;
+        }
+
+        .room-code-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .copy-btn {
+            background: #e7e8ec;
+            border: none;
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #d1d2d6;
+        }
+
+        .participant-list {
+            margin: 20px 0;
+        }
+
+        .participant-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e7e8ec;
+        }
+
+        .participant-name {
+            font-weight: 600;
+        }
+
+        .participant-status {
+            font-size: 12px;
+            color: #adadad;
+            text-transform: uppercase;
+        }
+
+        .item-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .item-input {
+            flex: 2;
+        }
+
+        .price-input {
+            flex: 1;
+        }
+
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .summary-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .summary-total {
+            font-weight: 700;
+            font-size: 18px;
+            padding-top: 8px;
+            border-top: 2px solid #e7e8ec;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #2171ec;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            padding: 8px 0;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .status-waiting {
+            background: #f59e0b;
+        }
+
+        .status-ready {
+            background: #10b981;
+        }
+
+        .bill-summary {
+            background: #ffffff;
+            border: 2px solid #e7e8ec;
+            padding: 24px;
+            margin: 20px 0;
+        }
+
+        .bill-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e7e8ec;
+        }
+
+        .bill-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #121212;
+        }
+
+        .bill-date {
+            font-size: 14px;
+            color: #adadad;
+        }
+
+        .person-section {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e7e8ec;
+        }
+
+        .person-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .person-items {
+            margin-left: 16px;
+        }
+
+        .person-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .person-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+
+        .details-table th, .details-table td {
+            padding: 8px;
+            border: 1px solid #e7e8ec;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .details-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .shared-items-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .shared-item {
+            padding: 4px 0;
+            font-size: 14px;
+        }
+
+        .toggle-details-btn {
+            background: #e7e8ec;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .toggle-details-btn:hover {
+            background: #d1d2d6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .app-title {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">
+            <h1 class="app-title">Pax</h1>
+            <p class="app-subtitle">Split bills effortlessly with friends</p>
+        </div>
+
+        <!-- Home Screen -->
+        <div id="home-screen" class="screen active">
+            <div class="card">
+                <div class="input-group">
+                    <label class="input-label">Your Name</label>
+                    <input type="text" id="user-name" class="input-field" placeholder="Enter your name">
+                </div>
+
+                <button class="btn btn-primary" onclick="showCreateRoom()">Create New Bill</button>
+                <button class="btn btn-secondary" style="margin-top: 12px;" onclick="showJoinRoom()">Join Existing Bill</button>
+            </div>
+        </div>
+
+        <!-- Create Room Screen -->
+        <div id="create-room-screen" class="screen">
+            <button class="back-btn" onclick="showHome()">← Back</button>
+            <div class="card">
+                <h2 style="margin-bottom: 20px; font-size: 20px;">Create New Bill</h2>
+                
+                <div class="input-group">
+                    <label class="input-label">Bill Name</label>
+                    <input type="text" id="bill-name" class="input-field" placeholder="e.g., Dinner at Tony's">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Currency</label>
+                    <select id="currency-select" class="input-field">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="BDT">BDT (৳)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Admin Password</label>
+                    <input type="password" id="admin-password" class="input-field" placeholder="Create a password to manage this bill">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Service Charge / Tax (%)</label>
+                    <input type="number" id="service-charge" class="input-field" placeholder="0" min="0" max="100">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Tip Amount</label>
+                    <input type="number" id="tip-amount" class="input-field" placeholder="0" min="0" step="0.01">
+                </div>
+
+                <h3 style="margin: 20px 0 12px 0; font-size: 16px;">Shared Items</h3>
+                <div id="shared-items">
+                    <div class="item-row">
+                        <input type="text" class="input-field item-input" placeholder="Item name">
+                        <input type="number" class="input-field price-input" placeholder="Price" min="0" step="0.01">
+                        <button class="remove-btn" onclick="removeSharedItem(this)">×</button>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" style="margin-bottom: 20px;" onclick="addSharedItem()">+ Add Shared Item</button>
+                <button class="btn btn-primary" onclick="createRoom()">Create Bill Room</button>
+            </div>
+        </div>
+
+        <!-- Join Room Screen -->
+        <div id="join-room-screen" class="screen">
+            <button class="back-btn" onclick="showHome()">← Back</button>
+            <div class="card">
+                <h2 style="margin-bottom: 20px; font-size: 20px;">Join Bill Room</h2>
+                
+                <div class="input-group">
+                    <label class="input-label">Room Code</label>
+                    <input type="text" id="room-code-input" class="input-field" placeholder="Enter 6-digit code">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Admin Password (if you're the admin)</label>
+                    <input type="password" id="admin-password-input" class="input-field" placeholder="Leave blank if you're a participant">
+                </div>
+
+                <button class="btn btn-primary" onclick="joinRoom()">Join Room</button>
+            </div>
+        </div>
+
+        <!-- Unified Dashboard -->
+        <div id="dashboard-screen" class="screen">
+            <div class="room-info">
+                <h2 id="bill-name"></h2>
+                <div class="room-code-container">
+                    <p id="room-code"></p>
+                    <button class="copy-btn" onclick="copyRoomLink()" title="Copy room link">📋</button>
+                </div>
+                <p id="admin-status">You're the admin or a participant</p>
+            </div>
+
+            <!-- Bill Details -->
+            <div class="card">
+                <button class="toggle-details-btn" onclick="toggleBillDetails()">Show Details ▼</button>
+                <div id="bill-details-content" style="display: none;">
+                    <table class="details-table">
+                        <tr>
+                            <th>Currency</th>
+                            <td id="details-currency"></td>
+                        </tr>
+                        <tr>
+                            <th>Service Charge</th>
+                            <td id="details-service-charge"></td>
+                        </tr>
+                        <tr>
+                            <th>Tip (per person)</th>
+                            <td id="details-tip"></td>
+                        </tr>
+                        <tr>
+                            <th>Shared Items</th>
+                            <td id="details-shared-items"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Personal Items -->
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">Your Items</h3>
+                <div id="personal-items">
+                    <div class="item-row">
+                        <input type="text" class="input-field item-input" placeholder="What did you order?">
+                        <input type="number" class="input-field price-input" placeholder="Price" min="0" step="0.01">
+                        <button class="remove-btn" onclick="removeItem(this)">×</button>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" style="margin-bottom: 12px;" onclick="addItem()">+ Add Item</button>
+                <button class="btn btn-primary" onclick="submitItems()" id="submit-items-btn">Submit My Items</button>
+            </div>
+
+            <!-- Participants and Admin Controls -->
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">Participants</h3>
+                <div id="participants-list" class="participant-list"></div>
+
+                <div id="admin-controls" style="display: none;">
+                    <div class="input-group" style="margin-top: 20px;">
+                        <label class="input-label">Who paid the full bill?</label>
+                        <select id="bill-payer-select" class="input-field">
+                            <option value="">Select who paid the bill</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" onclick="splitBill()" id="split-bill-btn" disabled>Split Bill</button>
+                </div>
+
+                <button class="btn btn-secondary" style="margin-top: 12px;" onclick="showHome()">Leave Room</button>
+            </div>
+        </div>
+
+        <!-- Bill Summary Screen -->
+        <div id="bill-summary-screen" class="screen">
+            <div class="bill-summary" id="bill-summary-content">
+                <!-- Summary content will be generated here -->
+            </div>
+            
+            <button class="btn btn-primary" onclick="shareBillLink()">Share Bill Link</button>
+            <button class="btn btn-secondary" style="margin-top: 8px;" onclick="showHome()">New Bill</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentUser = '';
+        let currentCurrency = 'USD';
+        let currentRoom = null;
+        let isAdmin = false;
+        let unsubscribe = null;
+
+        const currencySymbols = {
+            'USD': '$',
+            'EUR': '€',
+            'GBP': '£',
+            'BDT': '৳'
+        };
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomCode = urlParams.get('room');
+            if (roomCode) {
+                db.collection('rooms').doc(roomCode).get().then(doc => {
+                    if (doc.exists) {
+                        currentRoom = { code: roomCode, ...doc.data() };
+                        currentCurrency = currentRoom.currency;
+                        generateBillSummary();
+                        showScreen('bill-summary-screen');
+                    }
+                }).catch(e => {
+                    console.error('Error loading room:', e);
+                    alert('Error loading room from URL.');
+                });
+            }
+        };
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showHome() {
+            showScreen('home-screen');
+            currentRoom = null;
+            isAdmin = false;
+            if (unsubscribe) unsubscribe();
+            try {
+                if (window.location.href !== 'about:srcdoc' && window.location.protocol !== 'file:') {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            } catch (e) {
+                console.warn('Unable to clear URL parameters:', e);
+            }
+        }
+
+        function showCreateRoom() {
+            if (!validateUserName()) return;
+            showScreen('create-room-screen');
+        }
+
+        function showJoinRoom() {
+            if (!validateUserName()) return;
+            showScreen('join-room-screen');
+        }
+
+        function validateUserName() {
+            const userName = document.getElementById('user-name').value.trim();
+            if (!userName) {
+                alert('Please enter your name first');
+                return false;
+            }
+            currentUser = userName;
+            return true;
+        }
+
+        function addSharedItem() {
+            const container = document.getElementById('shared-items');
+            const itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+            itemRow.innerHTML = `
+                <input type="text" class="input-field item-input" placeholder="Item name">
+                <input type="number" class="input-field price-input" placeholder="Price" min="0" step="0.01">
+                <button class="remove-btn" onclick="removeSharedItem(this)">×</button>
+            `;
+            container.appendChild(itemRow);
+        }
+
+        function removeSharedItem(btn) {
+            const container = document.getElementById('shared-items');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+            }
+        }
+
+        function addItem() {
+            const container = document.getElementById('personal-items');
+            const itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+            itemRow.innerHTML = `
+                <input type="text" class="input-field item-input" placeholder="What did you order?">
+                <input type="number" class="input-field price-input" placeholder="Price" min="0" step="0.01">
+                <button class="remove-btn" onclick="removeItem(this)">×</button>
+            `;
+            container.appendChild(itemRow);
+        }
+
+        function removeItem(btn) {
+            const container = document.getElementById('personal-items');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+            }
+        }
+
+        function createRoom() {
+            try {
+                const billNameInput = document.getElementById('bill-name');
+                const adminPasswordInput = document.getElementById('admin-password');
+                const currencySelect = document.getElementById('currency-select');
+                const serviceChargeInput = document.getElementById('service-charge');
+                const tipAmountInput = document.getElementById('tip-amount');
+
+                if (!billNameInput || !adminPasswordInput || !currencySelect || !serviceChargeInput || !tipAmountInput) {
+                    console.error('One or more input elements not found');
+                    alert('Error: Form inputs not found. Please try again.');
+                    return;
+                }
+
+                const billName = billNameInput.value.trim();
+                const adminPassword = adminPasswordInput.value.trim();
+                const currency = currencySelect.value;
+                const serviceCharge = parseFloat(serviceChargeInput.value) || 0;
+                const tipAmount = parseFloat(tipAmountInput.value) || 0;
+
+                if (!billName) {
+                    console.warn('Bill name is empty');
+                    alert('Please enter a bill name');
+                    return;
+                }
+
+                if (!adminPassword) {
+                    console.warn('Admin password is empty');
+                    alert('Please create an admin password');
+                    return;
+                }
+
+                if (!['USD', 'EUR', 'GBP', 'BDT'].includes(currency)) {
+                    console.error('Invalid currency selected:', currency);
+                    alert('Please select a valid currency');
+                    return;
+                }
+
+                if (isNaN(serviceCharge) || serviceCharge < 0 || serviceCharge > 100) {
+                    console.warn('Invalid service charge:', serviceChargeInput.value);
+                    alert('Service charge must be between 0 and 100');
+                    return;
+                }
+
+                if (isNaN(tipAmount) || tipAmount < 0) {
+                    console.warn('Invalid tip amount:', tipAmountInput.value);
+                    alert('Tip amount must be 0 or positive');
+                    return;
+                }
+
+                const roomCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+                console.log('Generated room code:', roomCode);
+
+                const sharedItems = [];
+                document.querySelectorAll('#shared-items .item-row').forEach(row => {
+                    const itemName = row.querySelector('.item-input').value.trim();
+                    const itemPrice = parseFloat(row.querySelector('.price-input').value) || 0;
+                    if (itemName && itemPrice > 0) {
+                        sharedItems.push({ name: itemName, price: itemPrice });
+                    }
+                });
+                console.log('Collected shared items:', sharedItems);
+
+                currentRoom = {
+                    code: roomCode,
+                    name: billName,
+                    admin: currentUser,
+                    adminPassword: adminPassword,
+                    currency: currency,
+                    serviceCharge: serviceCharge,
+                    tipAmount: tipAmount,
+                    billPayer: '',
+                    sharedItems: sharedItems,
+                    participants: [
+                        {
+                            name: currentUser,
+                            items: [],
+                            submitted: false
+                        }
+                    ]
+                };
+
+                db.collection('rooms').doc(roomCode).set(currentRoom)
+                    .then(() => {
+                        currentCurrency = currency;
+                        isAdmin = true;
+                        console.log('Room created with name:', billName);
+                        console.log('Room details:', currentRoom);
+                        showDashboard();
+                    })
+                    .catch(e => {
+                        console.error('Error creating room:', e);
+                        alert('Failed to create room. Please try again.');
+                    });
+            } catch (e) {
+                console.error('Error creating room:', e);
+                alert('Failed to create room. Please try again.');
+            }
+        }
+
+        function joinRoom() {
+            try {
+                const roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
+                const adminPassword = document.getElementById('admin-password-input').value.trim();
+
+                if (!roomCode) {
+                    alert('Please enter a room code');
+                    return;
+                }
+
+                db.collection('rooms').doc(roomCode).get().then(doc => {
+                    if (!doc.exists) {
+                        alert('Room not found. Please check the code.');
+                        return;
+                    }
+
+                    currentRoom = { code: roomCode, ...doc.data() };
+                    console.log('Joined room with name:', currentRoom.name);
+
+                    if (adminPassword) {
+                        if (adminPassword === currentRoom.adminPassword) {
+                            currentUser = currentRoom.admin;
+                            isAdmin = true;
+                            console.log('Admin login successful');
+                            showDashboard();
+                            return;
+                        } else {
+                            alert('Incorrect admin password');
+                            return;
+                        }
+                    }
+
+                    if (currentRoom.participants.find(p => p.name === currentUser)) {
+                        alert('This username is already in the room.');
+                        return;
+                    }
+
+                    currentRoom.participants.push({
+                        name: currentUser,
+                        items: [],
+                        submitted: false
+                    });
+
+                    db.collection('rooms').doc(roomCode).update({
+                        participants: currentRoom.participants
+                    }).then(() => {
+                        isAdmin = false;
+                        console.log('Participant joined:', currentUser);
+                        console.log('Room details:', currentRoom);
+                        showDashboard();
+                    }).catch(e => {
+                        console.error('Error joining room:', e);
+                        alert('Error joining room. Please try again.');
+                    });
+                }).catch(e => {
+                    console.error('Error fetching room:', e);
+                    alert('Error joining room. Please try again.');
+                });
+            } catch (e) {
+                console.error('Error joining room:', e);
+                alert('Error joining room. Please try again.');
+            }
+        }
+
+        function showDashboard() {
+            try {
+                console.log('showDashboard: currentRoom=', currentRoom);
+                if (!currentRoom || !currentRoom.name) {
+                    console.error('Room or room name is missing');
+                    alert('Error: Unable to load dashboard.');
+                    showHome();
+                    return;
+                }
+
+                const billNameElement = document.getElementById('bill-name');
+                if (!billNameElement) {
+                    console.error('bill-name element missing');
+                } else {
+                    billNameElement.textContent = currentRoom.name || 'Untitled Bill';
+                    console.log('Bill name:', currentRoom.name);
+                }
+
+                document.getElementById('room-code').textContent = `Code: ${currentRoom.code}`;
+                document.getElementById('admin-status').textContent = isAdmin ? "You're the admin" : "You're a participant";
+
+                const symbol = currencySymbols[currentRoom.currency];
+                const participantCount = currentRoom.participants.length || 1;
+                const tipPerPerson = (currentRoom.tipAmount / participantCount).toFixed(2);
+
+                console.log('Tip calc: tipAmount=', currentRoom.tipAmount, 'participants=', participantCount, 'tipPerPerson=', tipPerPerson);
+
+                document.getElementById('details-currency').textContent = `${currentRoom.currency} (${symbol})`;
+                document.getElementById('details-service-charge').textContent = `${currentRoom.serviceCharge}%`;
+                document.getElementById('details-tip').textContent = `${symbol}${tipPerPerson}`;
+
+                const sharedItemsDiv = document.getElementById('details-shared-items');
+                if (currentRoom.sharedItems.length > 0) {
+                    let sharedHTML = '<ul class="shared-items-list">';
+                    currentRoom.sharedItems.forEach(item => {
+                        sharedHTML += `<li class="shared-item">${item.name}: ${symbol}${item.price.toFixed(2)}</li>`;
+                    });
+                    sharedHTML += '</ul>';
+                    sharedItemsDiv.innerHTML = sharedHTML;
+                } else {
+                    sharedItemsDiv.textContent = 'None';
+                }
+
+                const submitBtn = document.getElementById('submit-items-btn');
+                const currentParticipant = currentRoom.participants.find(p => p.name === currentUser);
+                if (!currentParticipant.submitted) {
+                    submitBtn.textContent = 'Submit My Items';
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('btn-success');
+                    submitBtn.classList.add('btn-primary');
+                } else {
+                    submitBtn.textContent = 'Items Submitted ✓';
+                    submitBtn.disabled = true;
+                    submitBtn.classList.remove('btn-primary');
+                    submitBtn.classList.add('btn-success');
+                }
+
+                if (isAdmin) {
+                    document.getElementById('admin-controls').style.display = 'block';
+                } else {
+                    document.getElementById('admin-controls').style.display = 'none';
+                }
+
+                updateParticipantsList();
+                if (unsubscribe) unsubscribe();
+                unsubscribe = db.collection('rooms').doc(currentRoom.code).onSnapshot(doc => {
+                    if (doc.exists) {
+                        currentRoom = { code: currentRoom.code, ...doc.data() };
+                        updateParticipantsList();
+                    }
+                });
+                showScreen('dashboard-screen');
+            } catch (e) {
+                console.error('Error in showDashboard:', e);
+                alert('Error loading dashboard. Please try again.');
+            }
+        }
+
+        function copyRoomLink() {
+            const roomLink = `${window.location.origin}${window.location.pathname}?room=${currentRoom.code}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(roomLink).then(() => {
+                    console.log('Room link copied:', roomLink);
+                    alert('Room link copied! Share with others.');
+                }).catch(e => {
+                    console.error('Error copying link:', e);
+                    alert(`Failed to copy link. Please copy manually: ${roomLink}`);
+                });
+            } else {
+                alert(`Clipboard not supported. Please copy manually: ${roomLink}`);
+            }
+        }
+
+        function toggleBillDetails() {
+            const contentDiv = document.getElementById('bill-details-content');
+            const buttonDiv = document.querySelector('.toggle-details-btn');
+            if (contentDiv.style.display === 'none') {
+                contentDiv.style.display = 'block';
+                buttonDiv.innerHTML = 'Hide Details ▲';
+            } else {
+                contentDiv.style.display = 'none';
+                buttonDiv.innerHTML = 'Show Details ▼';
+            }
+        }
+
+        function updateParticipantsList() {
+            const participantsDiv = document.getElementById('participants-list');
+            const payerSelectDiv = document.getElementById('bill-payer-select');
+
+            if (!participantsDiv) return;
+
+            participantsDiv.innerHTML = '';
+
+            if (payerSelectDiv && isAdmin) {
+                const currentPayer = payerSelectDiv.value;
+                payerSelectDiv.innerHTML = '<option value="">Select bill payer</option>';
+
+                currentRoom.participants.forEach(participant => {
+                    const optionDiv = document.createElement('option');
+                    optionDiv.value = participant.name;
+                    optionDiv.textContent = participant.name;
+                    if (participant.name === currentPayer) {
+                        optionDiv.selected = true;
+                    }
+                    payerSelectDiv.appendChild(optionDiv);
+                });
+            }
+
+            let allSubmitted = true;
+            currentRoom.participants.forEach(participant => {
+                const div = document.createElement('div');
+                div.className = 'participant-item';
+
+                const statusClass = participant.submitted ? 'status-ready' : 'status-waiting';
+                const statusText = participant.submitted ? 'Ready' : 'Adding items';
+
+                if (!participant.submitted) allSubmitted = false;
+
+                div.innerHTML = `
+                    <span class="participant-name">${participant.name}</span>
+                    <span class="participant-status">${statusText} <span class="status-indicator ${statusClass}"></span></span>
+                `;
+                participantsDiv.appendChild(div);
+            });
+
+            const billSplitBtn = document.getElementById('split-bill-btn');
+            if (billSplitBtn && isAdmin) {
+                const payerSelected = payerSelectDiv && payerSelectDiv.value !== '';
+                billSplitBtn.disabled = !allSubmitted || currentRoom.participants.length < 2 || !payerSelected;
+            }
+        }
+
+        function submitItems() {
+            const items = [];
+            document.querySelectorAll('#personal-items .item-row').forEach(row => {
+                const itemName = row.querySelector('.item-input').value.trim();
+                const itemPrice = parseFloat(row.querySelector('.price-input').value) || 0;
+                if (itemName && itemPrice > 0) {
+                    items.push({ name: itemName, price: itemPrice });
+                }
+            });
+
+            if (items.length === 0) {
+                alert('Please add at least one valid item with a name and price');
+                return;
+            }
+
+            const currentParticipant = currentRoom.participants.find(p => p.name === currentUser);
+            currentParticipant.items = items;
+            currentParticipant.submitted = true;
+
+            db.collection('rooms').doc(currentRoom.code).update({
+                participants: currentRoom.participants
+            }).then(() => {
+                const submitBtn = document.getElementById('submit-items-btn');
+                submitBtn.textContent = 'Items Submitted ✓';
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('btn-primary');
+                submitBtn.classList.add('btn-success');
+                alert('Items submitted!');
+            }).catch(e => {
+                console.error('Error submitting items:', e);
+                alert('Error submitting items. Please try again.');
+            });
+        }
+
+        function splitBill() {
+            const billPayerSelect = document.getElementById('bill-payer-select');
+            if (!billPayerSelect.value) {
+                alert('Please select a bill payer');
+                return;
+            }
+
+            currentRoom.billPayer = billPayerSelect.value;
+            db.collection('rooms').doc(currentRoom.code).update({
+                billPayer: currentRoom.billPayer
+            }).then(() => {
+                generateBillSummary();
+                showScreen('bill-summary-screen');
+            }).catch(e => {
+                console.error('Error splitting bill:', e);
+                alert('Error splitting bill. Please try again.');
+            });
+        }
+
+        function generateBillSummary() {
+            try {
+                const summaryDiv = document.getElementById('bill-summary-content');
+                const symbol = currencySymbols[currentRoom.currency];
+
+                let html = `
+                    <div class="bill-header">
+                        <div class="bill-title">${currentRoom.name}</div>
+                        <div class="bill-date">${new Date().toLocaleDateString()}</div>
+                        ${currentRoom.billPayer ? `<p>Paid by ${currentRoom.billPayer}</p>` : ''}
+                    </div>
+                `;
+
+                let sharedTotal = 0;
+                const participantCount = currentRoom.participants.length;
+
+                console.log('Summary: tipAmount=', currentRoom.tipAmount, 'participants=', participantCount);
+
+                if (currentRoom.sharedItems.length > 0) {
+                    html += `<div class="person-section">
+                        <div class="person-name">Shared Items</div>
+                        <div class="person-items">`;
+                    currentRoom.sharedItems.forEach(item => {
+                        sharedTotal += item.price;
+                        html += `<div class="person-item">
+                            <span>${item.name}</span>
+                            <span>${symbol}${item.price.toFixed(2)}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                let paymentItems = '';
+                currentRoom.participants.forEach(participant => {
+                    let participantTotal = 0;
+
+                    html += `<div class="person-section">
+                        <div class="person-name">${participant.name}</div>
+                        <div class="person-items">`;
+
+                    participant.items.forEach(item => {
+                        participantTotal += item.price;
+                        html += `<div class="person-item">
+                            <span>${item.name}</span>
+                            <span>${symbol}${item.price.toFixed(2)}</span>
+                        </div>`;
+                    });
+
+                    const sharedPortion = sharedTotal / participantCount;
+                    if (sharedPortion > 0) {
+                        html += `<div class="person-item">
+                            <span>Shared items (1/${participantCount})</span>
+                            <span>${symbol}${sharedPortion.toFixed(2)}</span>
+                        </div>`;
+                        participantTotal += sharedPortion;
+                    }
+
+                    const serviceChargeAmount = (participantTotal * currentRoom.serviceCharge) / 100;
+                    const tipPerPerson = parseFloat((currentRoom.tipAmount / participantCount).toFixed(2));
+
+                    if (currentRoom.serviceCharge > 0) {
+                        html += `<div class="person-item">
+                            <span>Service Charge (${currentRoom.serviceCharge}%)</span>
+                            <span>${symbol}${serviceChargeAmount.toFixed(2)}</span>
+                        </div>`;
+                    }
+                    if (currentRoom.tipAmount > 0) {
+                        html += `<div class="person-item">
+                            <span>Tip</span>
+                            <span>${symbol}${tipPerPerson.toFixed(2)}</span>
+                        </div>`;
+                    }
+
+                    const finalTotal = participantTotal + serviceChargeAmount + tipPerPerson;
+
+                    html += `</div>
+                        <div class="person-total">
+                            <div class="total-name">Total</div>
+                            <span>${symbol}${finalTotal.toFixed(2)}</span>
+                        </div>
+                    </div>`;
+
+                    if (participant.name !== currentRoom.billPayer && finalTotal > 0) {
+                        paymentItems += `<div class="person-item">
+                            <span>${participant.name} owes ${currentRoom.billPayer}</span>
+                            <span>${symbol}${finalTotal.toFixed(2)}</span>
+                        </div>`;
+                    }
+                });
+
+                if (paymentItems && currentRoom.billPayer) {
+                    html += `<div class="person-section" style="background: #f8f9fa;">
+                        <div class="person-name">Payments</div>
+                        <div class="person-items">
+                            ${paymentItems}
+                        </div>
+                    </div>`;
+                }
+
+                summaryDiv.innerHTML = html;
+            } catch (e) {
+                console.error('Error in summary:', e);
+                alert('Error generating summary.');
+            }
+        }
+
+        function shareBillLink() {
+            const billLink = `${window.location.origin}${window.location.pathname}?room=${currentRoom.code}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(billLink).then(() => {
+                    console.log('Bill link copied:', billLink);
+                    alert('Bill link copied! Share with others.');
+                }).catch(e => {
+                    console.error('Error copying link:', e);
+                    alert(`Failed to copy link. Please copy manually: ${billLink}`);
+                });
+            } else {
+                alert(`Clipboard not supported. Please copy manually: ${billLink}`);
+            }
+        }
+    </script>
+</body>
+</html>
