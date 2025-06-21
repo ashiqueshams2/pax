@@ -526,10 +526,11 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
-    <script>
-        // Firebase configuration
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+        // Replace with your Firebase configuration from Firebase Console
         const firebaseConfig = {
   apiKey: "AIzaSyBsNa30_mBWbdaCpuFrcIVhkY-m4ITpk64",
   authDomain: "pax-bill-splitter.firebaseapp.com",
@@ -541,8 +542,8 @@
 };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
         let currentUser = '';
         let currentCurrency = 'USD';
@@ -561,9 +562,9 @@
             const urlParams = new URLSearchParams(window.location.search);
             const roomCode = urlParams.get('room');
             if (roomCode) {
-                db.collection('rooms').doc(roomCode).get().then(doc => {
-                    if (doc.exists) {
-                        currentRoom = { code: roomCode, ...doc.data() };
+                getDoc(doc(collection(db, 'rooms'), roomCode)).then(docSnap => {
+                    if (docSnap.exists()) {
+                        currentRoom = { code: roomCode, ...docSnap.data() };
                         currentCurrency = currentRoom.currency;
                         generateBillSummary();
                         showScreen('bill-summary-screen');
@@ -736,7 +737,7 @@
                     ]
                 };
 
-                db.collection('rooms').doc(roomCode).set(currentRoom)
+                setDoc(doc(collection(db, 'rooms'), roomCode), currentRoom)
                     .then(() => {
                         currentCurrency = currency;
                         isAdmin = true;
@@ -764,13 +765,13 @@
                     return;
                 }
 
-                db.collection('rooms').doc(roomCode).get().then(doc => {
-                    if (!doc.exists) {
+                getDoc(doc(collection(db, 'rooms'), roomCode)).then(docSnap => {
+                    if (!docSnap.exists()) {
                         alert('Room not found. Please check the code.');
                         return;
                     }
 
-                    currentRoom = { code: roomCode, ...doc.data() };
+                    currentRoom = { code: roomCode, ...docSnap.data() };
                     console.log('Joined room with name:', currentRoom.name);
 
                     if (adminPassword) {
@@ -797,7 +798,7 @@
                         submitted: false
                     });
 
-                    db.collection('rooms').doc(roomCode).update({
+                    updateDoc(doc(collection(db, 'rooms'), roomCode), {
                         participants: currentRoom.participants
                     }).then(() => {
                         isAdmin = false;
@@ -883,9 +884,9 @@
 
                 updateParticipantsList();
                 if (unsubscribe) unsubscribe();
-                unsubscribe = db.collection('rooms').doc(currentRoom.code).onSnapshot(doc => {
-                    if (doc.exists) {
-                        currentRoom = { code: currentRoom.code, ...doc.data() };
+                unsubscribe = onSnapshot(doc(collection(db, 'rooms'), currentRoom.code), docSnap => {
+                    if (docSnap.exists()) {
+                        currentRoom = { code: currentRoom.code, ...docSnap.data() };
                         updateParticipantsList();
                     }
                 });
@@ -989,7 +990,7 @@
             currentParticipant.items = items;
             currentParticipant.submitted = true;
 
-            db.collection('rooms').doc(currentRoom.code).update({
+            updateDoc(doc(collection(db, 'rooms'), currentRoom.code), {
                 participants: currentRoom.participants
             }).then(() => {
                 const submitBtn = document.getElementById('submit-items-btn');
@@ -1012,7 +1013,7 @@
             }
 
             currentRoom.billPayer = billPayerSelect.value;
-            db.collection('rooms').doc(currentRoom.code).update({
+            updateDoc(doc(collection(db, 'rooms'), currentRoom.code), {
                 billPayer: currentRoom.billPayer
             }).then(() => {
                 generateBillSummary();
